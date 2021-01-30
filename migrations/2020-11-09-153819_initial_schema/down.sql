@@ -1,3 +1,9 @@
+DROP TABLE tracks;
+
+DROP TABLE track_sets;
+
+DROP TABLE mediums;
+
 DROP TABLE performances;
 
 DROP TABLE recordings;
@@ -17,3 +23,4 @@ DROP TABLE instruments;
 DROP TABLE persons;
 
 DROP TABLE users;
+

@@ -68,3 +68,25 @@ CREATE TABLE performances (
     ensemble TEXT REFERENCES ensembles(id),
     role TEXT REFERENCES instruments(id)
 );
+
+CREATE TABLE mediums (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    discid TEXT,
+    created_by TEXT NOT NULL REFERENCES users(username)
+);
+
+CREATE TABLE track_sets (
+    id BIGINT NOT NULL PRIMARY KEY,
+    medium TEXT NOT NULL REFERENCES mediums(id) ON DELETE CASCADE,
+    index INTEGER NOT NULL,
+    recording TEXT NOT NULL REFERENCES recordings(id)
+);
+
+CREATE TABLE tracks (
+    id BIGINT NOT NULL PRIMARY KEY,
+    track_set BIGINT NOT NULL REFERENCES track_sets(id) ON DELETE CASCADE,
+    index INTEGER NOT NULL,
+    work_parts TEXT NOT NULL
+);
+

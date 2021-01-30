@@ -8,6 +8,9 @@ pub use ensembles::*;
 pub mod instruments;
 pub use instruments::*;
 
+pub mod mediums;
+pub use mediums::*;
+
 pub mod persons;
 pub use persons::*;
 

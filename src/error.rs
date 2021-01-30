@@ -35,7 +35,10 @@ impl From<anyhow::Error> for ServerError {
     fn from(error: anyhow::Error) -> Self {
         match error.downcast() {
             Ok(error) => error,
-            Err(_) => ServerError::Internal,
+            Err(error) => {
+                println!("{:?}", error);
+                ServerError::Internal
+            },
         }
     }
 }
