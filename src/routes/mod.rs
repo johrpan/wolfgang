@@ -1,6 +1,9 @@
 pub mod auth;
 pub use auth::*;
 
+pub mod captcha;
+pub use captcha::*;
+
 pub mod ensembles;
 pub use ensembles::*;
 

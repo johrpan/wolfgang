@@ -1,3 +1,4 @@
+use super::CaptchaManager;
 use crate::database;
 use crate::database::{DbConn, DbPool, User, UserInsertion};
 use crate::error::ServerError;
@@ -14,6 +15,8 @@ pub struct UserRegistration {
     pub username: String,
     pub password: String,
     pub email: Option<String>,
+    pub captcha_id: String,
+    pub answer: String,
 }
 
 /// Request body data for user login.
@@ -52,24 +55,31 @@ struct Claims {
 #[post("/users")]
 pub async fn register_user(
     db: web::Data<DbPool>,
+    captcha_manager: web::Data<CaptchaManager>,
     data: web::Json<UserRegistration>,
 ) -> Result<HttpResponse, ServerError> {
-    web::block(move || {
-        let conn = db.into_inner().get().or(Err(ServerError::Internal))?;
+    let captcha_manager = captcha_manager.into_inner();
 
-        database::insert_user(
-            &conn,
-            &data.username,
-            &UserInsertion {
-                password_hash: hash_password(&data.password).or(Err(ServerError::Internal))?,
-                email: data.email.clone(),
-            },
-        )
-        .or(Err(ServerError::Internal))
-    })
-    .await?;
+    if captcha_manager.check_captcha(&data.captcha_id, &data.answer)? {
+        web::block(move || {
+            let conn = db.into_inner().get().or(Err(ServerError::Internal))?;
 
-    Ok(HttpResponse::Ok().finish())
+            database::insert_user(
+                &conn,
+                &data.username,
+                &UserInsertion {
+                    password_hash: hash_password(&data.password).or(Err(ServerError::Internal))?,
+                    email: data.email.clone(),
+                },
+            )
+            .or(Err(ServerError::Internal))
+        })
+        .await?;
+
+        Ok(HttpResponse::Ok().finish())
+    } else {
+        Err(ServerError::Forbidden)
+    }
 }
 
 /// Update an existing user. This doesn't use a JWT for authentication but requires the client to
