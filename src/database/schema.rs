@@ -94,7 +94,6 @@ table! {
         work -> Text,
         part_index -> Int8,
         title -> Text,
-        composer -> Nullable<Text>,
     }
 }
 
@@ -131,7 +130,6 @@ joinable!(recordings -> works (work));
 joinable!(track_sets -> mediums (medium));
 joinable!(track_sets -> recordings (recording));
 joinable!(tracks -> track_sets (track_set));
-joinable!(work_parts -> persons (composer));
 joinable!(work_parts -> works (work));
 joinable!(work_sections -> works (work));
 joinable!(works -> persons (composer));

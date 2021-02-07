@@ -24,7 +24,6 @@ pub struct Work {
 #[serde(rename_all = "camelCase")]
 pub struct WorkPart {
     pub title: String,
-    pub composer: Option<Person>,
 }
 
 /// A heading within the work structure.
@@ -62,7 +61,6 @@ struct WorkPartRow {
     pub work: String,
     pub part_index: i64,
     pub title: String,
-    pub composer: Option<String>,
 }
 
 /// Table data for a work section.
@@ -106,14 +104,6 @@ pub fn update_work(conn: &DbConn, work: &Work, user: &User) -> Result<()> {
                 }
             }
 
-            for part in &work.parts {
-                if let Some(person) = &part.composer {
-                    if get_person(conn, &person.id)?.is_none() {
-                        update_person(conn, person, &user)?;
-                    }
-                }
-            }
-
             // Add the actual work.
 
             let row = WorkRow {
@@ -143,7 +133,6 @@ pub fn update_work(conn: &DbConn, work: &Work, user: &User) -> Result<()> {
                     work: id.clone(),
                     part_index: index.try_into()?,
                     title: part.title.clone(),
-                    composer: part.composer.as_ref().map(|person| person.id.clone()),
                 };
 
                 diesel::insert_into(work_parts::table)
@@ -242,12 +231,6 @@ fn get_description_for_work_row(conn: &DbConn, row: &WorkRow) -> Result<Work> {
     for part_row in part_rows {
         parts.push(WorkPart {
             title: part_row.title,
-            composer: match part_row.composer {
-                Some(id) => {
-                    Some(get_person(conn, &id)?.ok_or(anyhow!("No person with ID: {}", id))?)
-                }
-                None => None,
-            },
         });
     }
 
